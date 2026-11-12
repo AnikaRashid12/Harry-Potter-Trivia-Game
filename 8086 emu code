@@ -1,21 +1,29 @@
 .MODEL SMALL
+
 .STACK 100H
+
+
 ; DATA SEGMENT
+
 .DATA
+
 ; Menu Messages
-welcomeMsg DB 0DH,0AH,"=== HARRY POTTER TRIVIA ===",0DH,0AH,"$"
-passmsg DB 0DH,0AH,"Enter Password (12 chars): $"
+welcomeMsg DB 0DH,0AH,"=== HARRY POTTER TRIVIA ===",0DH,0AH,"$" 
+passmsg  DB 0DH,0AH,"Enter Password (12 chars): $"
 adminmsg DB 0DH,0AH,"=== ADMIN MODE ACTIVATED ===$"
 menuMsg DB "1. Start Quiz",0DH,0AH,"2. Exit",0DH,0AH,"$"
 choiceMsg DB 0DH,0AH,"Your choice: $"
+
 ; Easy Level Questions (Yes/No Format)
 easyQ1 DB 0DH,0AH,"Harry Potter is a wizard? (y/n)$"
 easyQ2 DB 0DH,0AH,"Harry belongs to Gryffindor house? (y/n)$"
 easyQ3 DB 0DH,0AH,"Voldemort is the main antagonist? (y/n)$"
 easyQ4 DB 0DH,0AH,"Dumbledore was headmaster of Hogwarts? (y/n)$"
+
 easyQuestions DW easyQ1,easyQ2,easyQ3,easyQ4
 easyAnswers DW easyA1,easyA2,easyA3,easyA4
 easyCount DB 4
+
 ; Medium Level Questions (Multiple Choice Format)
 medQ1 DB 0DH,0AH,"Which house values bravery? (a)Gryffindor (b)Slytherin (c)Ravenclaw (d)Hufflepuff$"
 medQ2 DB 0DH,0AH,"Who is the Potions professor in most books? (a)Snape (b)Hagrid (c)Lupin (d)Sirius$"
@@ -23,9 +31,11 @@ medQ3 DB 0DH,0AH,"What is the name of Harrys owl? (a)Crookshanks (b)Scabbers (c)
 medQ4 DB 0DH,0AH,"Which object stores memories? (a)Horcrux (b)Pensieve (c)Wand (d)Broom$"
 medQ5 DB 0DH,0AH,"Which spell disarms an opponent? (a)Expelliarmus (b)Avada (c)Lumos (d)Nox$"
 medQ6 DB 0DH,0AH,"Which sport is played on broomsticks? (a)Chess (b)Quidditch (c)Gobstones (d)Duelling$"
+
 medQuestions DW medQ1,medQ2,medQ3,medQ4,medQ5,medQ6
 medAnswers DW medA1,medA2,medA3,medA4,medA5,medA6
 medCount DB 6
+
 ; Hard Level Questions (Short Answer Format)
 hardQ1 DB 0DH,0AH,"1) What are used as soul container?$"
 hardQ2 DB 0DH,0AH,"2) The three magical objects together is called?$"
@@ -35,20 +45,24 @@ hardQ5 DB 0DH,0AH,"5) Elder Wand owner?$"
 hardQ6 DB 0DH,0AH,"6) The magical map showing all Hogwarts movements?$"
 hardQ7 DB 0DH,0AH,"7) Prison for wizards?$"
 hardQ8 DB 0DH,0AH,"8) Dark wizard prison guards?$"
+
 hardQuestions DW hardQ1,hardQ2,hardQ3,hardQ4,hardQ5,hardQ6,hardQ7,hardQ8
 hardAnswers DW hardA1,hardA2,hardA3,hardA4,hardA5,hardA6,hardA7,hardA8
 hardCount DB 8
+
 ; Answer Keys
 easyA1 DB "y$"
 easyA2 DB "y$"
 easyA3 DB "y$"
 easyA4 DB "y$"
+
 medA1 DB "a$"
 medA2 DB "a$"
 medA3 DB "c$"
 medA4 DB "b$"
 medA5 DB "a$"
 medA6 DB "b$"
+
 hardA1 DB "horcrux$"
 hardA2 DB "deathly hallows$"
 hardA3 DB "accio$"
@@ -57,24 +71,33 @@ hardA5 DB "dumbledore$"
 hardA6 DB "marauders map$"
 hardA7 DB "azkaban$"
 hardA8 DB "dementors$"
+
 ; Status Messages
 correctMsg DB 0DH,0AH,"Correct!$"
 wrongMsg DB 0DH,0AH,"Wrong!$"
+
 easyDone DB 0DH,0AH,"Easy level completed!$"
 medDone DB 0DH,0AH,"Medium level completed!$"
 hardDone DB 0DH,0AH,"Hard level completed!$"
+
 scoreMsg DB 0DH,0AH,"Score: $"
 livesMsg DB 0DH,0AH,"Lives: $"
+
 goodMsg DB 0DH,0AH,"You did well!$"
 okMsg DB 0DH,0AH,"Better luck next time!$"
 badMsg DB 0DH,0AH,"Try more!$"
 playAgainMsg DB 0DH,0AH,"Play again? (y/n): $"
+
 ; Game State Variables
 score DW 0
 lives DB 3
 qIndex DB 0
-userAns DB 32 DUP('$')
-; ADMIN VIEW DATA
+userAns DB 30 DUP('$')
+
+
+; ADMIN VIEW DATA 
+
+
 ; Admin View Menu Messages
 adminMenuMsg DB 0DH,0AH,"Admin Menu: 1-Settings 2-Quiz 3-Exit Admin Mode: $"
 viewmsg DB 0DH,0AH,"1-Read Question Vault 2-Modify HP 3-Exit: $"
@@ -85,442 +108,394 @@ hpmsg DB 0DH,0AH,"Current HP: $"
 newhpmsg DB 0DH,0AH,"Enter New HP (1-9): $"
 hpsuccessmsg DB 0DH,0AH,"HP Modified Successfully!$"
 newline DB 0DH,0AH,'$'
+
 ; Level Labels
 easylabelmsg DB 0DH,0AH,"=== EASY LEVEL ===$"
 medlabelmsg DB 0DH,0AH,"=== MEDIUM LEVEL ===$"
 hardlabelmsg DB 0DH,0AH,"=== HARD LEVEL ===$"
+
 ; Admin view working variables
 current_level DB 0
 current_index DB 0
 admin_mode DB 0
 temp_count DB 0
-default_hp DB 3 ; Default hp = 3
-admin_password DB "admin1234567$" ; Admin password constant
+default_hp DB 3           ; Default hp = 3
+admin_password DB "admin1234567$"  ; Admin password constant
+
+
 ; CODE SEGMENT
+
+
 .CODE
+
+
 ; MAIN PROCEDURE
+
+
 MAIN PROC
-MOV AX,@DATA
-MOV DS,AX
-;Admin authentication at startup
-JMP ADMIN_ENTRY
+    MOV AX,@DATA
+    MOV DS,AX
+
+    ;Admin authentication at startup
+    JMP ADMIN_ENTRY
+
+
 ; MENU - Display menu and handle user choice
+
+
 MENU:
-;Check if admin mode is active
-CMP admin_mode,1
-JE ADMIN_MENU
-; Regular user menu
-LEA DX,welcomeMsg
-MOV AH,9
-INT 21H
-LEA DX,menuMsg
-MOV AH,9
-INT 21H
-LEA DX,choiceMsg
-MOV AH,9
-INT 21H
-MOV AH,1
-INT 21H
-CMP AL,'1'
-JE START_GAME
-CMP AL,'2'
-JE EXIT
-CMP AL,'0'
-JE ADMIN_ENTRY
-JMP MENU
+    ;Check if admin mode is active
+    CMP admin_mode,1
+    JE ADMIN_MENU
+
+    ; Regular user menu
+    LEA DX,welcomeMsg
+    MOV AH,9
+    INT 21H
+
+    LEA DX,menuMsg
+    MOV AH,9
+    INT 21H
+
+    LEA DX,choiceMsg
+    MOV AH,9
+    INT 21H
+
+    MOV AH,1
+    INT 21H
+
+    CMP AL,'1'
+    JE START_GAME
+    CMP AL,'2'
+    JE EXIT
+    CMP AL,'0'
+    JE ADMIN_ENTRY
+
+    JMP MENU
+
+
 ; ADMIN_MENU - Admin menu with settings access
+
+
 ADMIN_MENU:
-LEA DX,adminMenuMsg
-MOV AH,9
-INT 21H
-MOV AH,1
-INT 21H
-CMP AL,'1'
-JE SETTINGS_MENU
-CMP AL,'2'
-JE START_GAME
-CMP AL,'3'
-JE RESET_ADMIN
-JMP ADMIN_MENU
+    LEA DX,adminMenuMsg
+    MOV AH,9
+    INT 21H
+
+    MOV AH,1
+    INT 21H
+
+    CMP AL,'1'
+    JE SETTINGS_MENU
+    CMP AL,'2'
+    JE START_GAME
+    CMP AL,'3'
+    JE RESET_ADMIN
+
+    JMP ADMIN_MENU
+
 RESET_ADMIN:
-MOV admin_mode,0
-JMP MENU
+    MOV admin_mode,0
+    JMP MENU
+
+
 ; SETTINGS_MENU - Settings menu with Read/Modify options
+
+
 SETTINGS_MENU:
-LEA DX,viewmsg
-MOV AH,9
-INT 21H
-MOV AH,1
-INT 21H
-CMP AL,'1'
-JE VIEW_OPERATIONS
-CMP AL,'2'
-JE MODIFY_HP
-CMP AL,'3'
-JE ADMIN_MENU
-JMP SETTINGS_MENU
+    LEA DX,viewmsg
+    MOV AH,9
+    INT 21H
+
+    MOV AH,1
+    INT 21H
+
+    CMP AL,'1'
+    JE VIEW_OPERATIONS
+    CMP AL,'2'
+    JE MODIFY_HP
+    CMP AL,'3'
+    JE ADMIN_MENU
+
+    JMP SETTINGS_MENU
+
+
 ; START_GAME - Initialize and run all quiz levels
+
+
 START_GAME:
-; FEATURE: Game initialization - reset score and lives
-MOV score,0
-MOV AL,default_hp
-MOV lives,AL
-; FEATURE: Sequential level progression (Easy -> Medium -> Hard)
-CALL RUN_EASY
-CMP lives,0
-JE FINAL_RESULT
-LEA DX,easyDone
-MOV AH,9
-INT 21H
-CALL SHOW_STATUS
-CALL RUN_MED
-CMP lives,0
-JE FINAL_RESULT
-LEA DX,medDone
-MOV AH,9
-INT 21H
-CALL SHOW_STATUS
-CALL RUN_HARD
-CMP lives,0
-JE FINAL_RESULT
-LEA DX,hardDone
-MOV AH,9
-INT 21H
-CALL SHOW_STATUS
+    ; FEATURE: Game initialization - reset score and lives
+    MOV score,0
+    MOV AL,default_hp
+    MOV lives,AL
+    
+    ; FEATURE: Sequential level progression (Easy -> Medium -> Hard)
+    CALL RUN_EASY
+    CMP lives,0
+    JE FINAL_RESULT
+
+    LEA DX,easyDone
+    MOV AH,9
+    INT 21H
+    CALL SHOW_STATUS
+    
+    CALL RUN_MED
+    CMP lives,0
+    JE FINAL_RESULT
+
+    LEA DX,medDone
+    MOV AH,9
+    INT 21H
+    CALL SHOW_STATUS
+    
+    CALL RUN_HARD
+    CMP lives,0
+    JE FINAL_RESULT
+
+    LEA DX,hardDone
+    MOV AH,9
+    INT 21H
+    CALL SHOW_STATUS
+
+
 ; FINAL_RESULT - Evaluate score and display performance message
+
+
 FINAL_RESULT:
-; FEATURE: Score evaluation with 3 performance tiers
-MOV AX,score
-CMP AX,120
-JAE MSG_GOOD
-CMP AX,60
-JAE MSG_OK
-JMP MSG_BAD
+    ; FEATURE: Score evaluation with 3 performance tiers
+    MOV AX,score
+    CMP AX,120
+    JAE MSG_GOOD
+    CMP AX,60
+    JAE MSG_OK
+    JMP MSG_BAD
+
 MSG_GOOD:
-LEA DX,goodMsg
-JMP SHOW_MSG
+    LEA DX,goodMsg
+    JMP SHOW_MSG
+
 MSG_OK:
-LEA DX,okMsg
-JMP SHOW_MSG
+    LEA DX,okMsg
+    JMP SHOW_MSG
+
 MSG_BAD:
-LEA DX,badMsg
+    LEA DX,badMsg
+
 SHOW_MSG:
-MOV AH,9
-INT 21H
-; FEATURE: Play again option allows replay without restart
-LEA DX,playAgainMsg
-MOV AH,9
-INT 21H
-MOV AH,1
-INT 21H
-CMP AL,'y'
-JE START_GAME
-JMP EXIT
+    MOV AH,9
+    INT 21H
+
+    ; FEATURE: Play again option allows replay without restart
+    LEA DX,playAgainMsg
+    MOV AH,9
+    INT 21H
+
+    MOV AH,1
+    INT 21H
+    CMP AL,'y'
+    JE START_GAME
+
+    JMP EXIT
+
 MAIN ENDP
+
+
 ; RUN_EASY PROCEDURE
+
 ; Loop through easy questions until all answered or lives = 0
+
 RUN_EASY PROC
-MOV qIndex,0
+    MOV qIndex,0
+
 EL:
-MOV AL,qIndex
-CMP AL,easyCount
-JAE ED
-CALL ASK_EASY
-CMP lives,0
-JE ED
-INC qIndex
-JMP EL
+    MOV AL,qIndex
+    CMP AL,easyCount
+    JAE ED
+
+    CALL ASK_EASY
+
+    CMP lives,0
+    JE ED
+
+    INC qIndex
+    JMP EL
+
 ED:
-RET
+    RET
+
 RUN_EASY ENDP
+
+
 ; RUN_MED PROCEDURE
 ; Loop through medium questions until all answered or lives = 0
+
 RUN_MED PROC
-MOV qIndex,0
+    MOV qIndex,0
+
 ML:
-MOV AL,qIndex
-CMP AL,medCount
-JAE MD
-CALL ASK_MED
-CMP lives,0
-JE MD
-INC qIndex
-JMP ML
+    MOV AL,qIndex
+    CMP AL,medCount
+    JAE MD
+
+    CALL ASK_MED
+
+    CMP lives,0
+    JE MD
+
+    INC qIndex
+    JMP ML
+
 MD:
-RET
+    RET
+
 RUN_MED ENDP
+
+
 ; RUN_HARD PROCEDURE
+
 ; Loop through hard questions until all answered or lives = 0
+
 RUN_HARD PROC
-MOV qIndex,0
+    MOV qIndex,0
+
 HL:
-MOV AL,qIndex
-CMP AL,hardCount
-JAE HD
-CALL ASK_HARD
-CMP lives,0
-JE HD
-INC qIndex
-JMP HL
+    MOV AL,qIndex
+    CMP AL,hardCount
+    JAE HD
+
+    CALL ASK_HARD
+
+    CMP lives,0
+    JE HD
+
+    INC qIndex
+    JMP HL
+
 HD:
-RET
+    RET
+
 RUN_HARD ENDP
+
+
 ; ASK_EASY PROCEDURE
+
 ; FEATURE: Easy level scoring - 10 points per correct answer
+
 ASK_EASY PROC
-LEA SI,easyQuestions
-LEA DI,easyAnswers
-CALL ASK_COMMON
-JC EASY_CORRECT
-RET
+    LEA SI,easyQuestions
+    LEA DI,easyAnswers
+
+    CALL ASK_COMMON
+    JC EASY_CORRECT
+    RET
+
 EASY_CORRECT:
-ADD score,10
-RET
+    ADD score,10
+    RET
+
 ASK_EASY ENDP
+
+
 ; ASK_MED PROCEDURE
+
 ; FEATURE: Medium level scoring - 15 points per correct answer
+
 ASK_MED PROC
-LEA SI,medQuestions
-LEA DI,medAnswers
-CALL ASK_COMMON
-JC MED_CORRECT
-RET
+    LEA SI,medQuestions
+    LEA DI,medAnswers
+
+    CALL ASK_COMMON
+    JC MED_CORRECT
+    RET
+
 MED_CORRECT:
-ADD score,15
-RET
+    ADD score,15
+    RET
+
 ASK_MED ENDP
+
+
 ; ASK_HARD PROCEDURE
+
 ; FEATURE: Hard level scoring - 20 points per correct answer
+
 ASK_HARD PROC
-LEA SI,hardQuestions
-LEA DI,hardAnswers
-CALL ASK_COMMON
-JC HARD_CORRECT
-RET
+    LEA SI,hardQuestions
+    LEA DI,hardAnswers
+
+    CALL ASK_COMMON
+    JC HARD_CORRECT
+    RET
+
 HARD_CORRECT:
-ADD score,20
-RET
+    ADD score,20
+    RET
+
 ASK_HARD ENDP
+
+
 ; ASK_COMMON PROCEDURE
+
 ; Unified question handler for all difficulty levels
+
+
 ASK_COMMON PROC
-; Save all registers using PUSH
-PUSH AX
-PUSH BX
-PUSH CX
-PUSH DX
-PUSH SI
-PUSH DI
-; Calculate question address using index * 2 (word pointer)
-MOV BL,qIndex
-MOV BH,0
-MOV AX,BX
-MOV CX,2
-MUL CX
-MOV BX,AX
-ADD SI,BX
-MOV DX,[SI]
-MOV AH,9
-INT 21H
-; Get user input into buffer
-LEA SI,userAns
-CALL INPUT_STRING
-; Calculate answer address using same index
-POP DI
-PUSH DI
-MOV BL,qIndex
-MOV BH,0
-MOV AX,BX
-MOV CX,2
-MUL CX
-MOV BX,AX
-ADD DI,BX
-MOV DI,[DI]
-; Compare user answer with correct answer
-LEA SI,userAns
-CALL COMPARE_STR
-JE SET_CARRY
-; Wrong answer handling
-LEA DX,wrongMsg
-MOV AH,9
-INT 21H
-; FEATURE: Lives system - decrease by 1 on wrong answer
-DEC lives
-CLC
-; Restore all registers using POP
-POP DI
-POP SI
-POP DX
-POP CX
-POP BX
-POP AX
-RET
-SET_CARRY:
-; Correct answer handling
-LEA DX,correctMsg
-MOV AH,9
-INT 21H
-; Set carry flag to indicate correct answer
-STC
-; Restore all registers using POP
-POP DI
-POP SI
-POP DX
-POP CX
-POP BX
-POP AX
-RET
-ASK_COMMON ENDP
-; SHOW_STATUS PROCEDURE
-; FEATURE: Display current game state (score and remaining lives)
-SHOW_STATUS PROC
-LEA DX,scoreMsg
-MOV AH,9
-INT 21H
-MOV AX,score
-CALL PRINT_NUM
-LEA DX,livesMsg
-MOV AH,9
-INT 21H
-MOV AL,lives
-ADD AL,'0'
-MOV DL,AL
-MOV AH,2
-INT 21H
-RET
-SHOW_STATUS ENDP
-; INPUT_STRING PROCEDURE
-; FEATURE: String input handler - reads up to 30 characters until Enter
-INPUT_STRING PROC
-MOV CX,30
-R:
-MOV AH,1
-INT 21H
-CMP AL,0DH
-JE D
-MOV [SI],AL
-INC SI
-LOOP R
-D:
-MOV AL,'$'
-MOV [SI],AL
-RET
-INPUT_STRING ENDP
-; COMPARE_STR PROCEDURE
-; FEATURE: String comparison - character by character matching
-COMPARE_STR PROC
-; Save registers using PUSH
-PUSH AX
-PUSH BX
-PUSH SI
-PUSH DI
-N:
-MOV AL,[SI]
-MOV BL,[DI]
-CMP AL,BL
-JNE NE
-CMP AL,'$'
-JE EQ
-INC SI
-INC DI
-JMP N
-NE:
-CMP AL,BL
-; Restore registers using POP
-POP DI
-POP SI
-POP BX
-POP AX
-RET
-EQ:
-CMP AL,AL
-; Restore registers using POP
-POP DI
-POP SI
-POP BX
-POP AX
-RET
-COMPARE_STR ENDP
-; PRINT_NUM PROCEDURE
-; FEATURE: Decimal number printer - converts binary to ASCII digits
-; Uses stack to reverse digit order for correct display
-PRINT_NUM PROC
-; Save registers using PUSH
-PUSH AX
-PUSH BX
-PUSH CX
-PUSH DX
-CMP AX,0
-JNE PN
-MOV DL,'0'
-MOV AH,2
-INT 21H
-JMP PD
-PN:
-MOV CX,0
-MOV BX,10
-PL:
-; Extract digits by repeatedly dividing by 10
-MOV DX,0
-DIV BX
-PUSH DX
-INC CX
-CMP AX,0
-JNE PL
-PP:
-; Pop and print digits in correct order
-POP DX
-ADD DL,'0'
-MOV AH,2
-INT 21H
-LOOP PP
-PD:
-; Restore registers using POP
-POP DX
-POP CX
-POP BX
-POP AX
-RET
-PRINT_NUM ENDP
-; ADMIN_ENTRY PROCEDURE
-; FEATURE: Character-by-character password validation
-; Password: admin1234567 (exactly 12 characters)
-; Each character validated individually
-ADMIN_ENTRY PROC
-LEA DX, passmsg
-MOV AH, 9
-INT 21H
-LEA SI, userAns
-MOV CX, 12
-ADMIN_PASS_LOOP:
-MOV AH, 1
-INT 21H
-MOV [SI], AL
-INC SI
-LOOP ADMIN_PASS_LOOP
-MOV AL,'$'
-MOV [SI],AL
-; Validate using string comparison loop
-LEA SI, userAns ; SI points to user input
-LEA DI, admin_password ; DI points to correct password
-MOV CX, 12
-COMPARE_PASS_LOOP:
-MOV AL, [SI]
-MOV BL, [DI]
-CMP AL, BL
-JNE ADMIN_FAIL
-INC SI
-INC DI
-LOOP COMPARE_PASS_LOOP
-; Password correct - grant access
-LEA DX, adminmsg
-MOV AH, 9
-INT 21H
-MOV admin_mode,1
-JMP ADMIN_MENU
-ADMIN_FAIL:
-; Password incorrect - return to menu
-MOV admin_mode,0
-JMP MENU
-ADMIN_ENTRY ENDP
-; Feature : Modifying the player HP
+    ; Save all registers using PUSH
+    PUSH AX
+    PUSH BX
+    PUSH CX
+    PUSH DX
+    PUSH SI
+    PUSH DI
+    
+    ; Calculate question address using index * 2 (word pointer)
+    MOV BL,qIndex
+    MOV BH,0
+    MOV AX,BX
+    MOV CX,2
+    MUL CX
+    MOV BX,AX
+    ADD SI,BX
+    MOV DX,[SI]
+
+    MOV AH,9
+    INT 21H
+    
+    ; Get user input into buffer
+    LEA SI,userAns
+    CALL INPUT_STRING
+    
+    ; Calculate answer address using same index
+    POP DI
+    PUSH DI
+    MOV BL,qIndex
+    MOV BH,0
+    MOV AX,BX
+    MOV CX,2
+    MUL CX
+    MOV BX,AX
+    ADD DI,BX
+    MOV DI,[DI]
+    
+    ; Compare user answer with correct answer
+    LEA SI,userAns
+    CALL COMPARE_STR
+    JE SET_CARRY
+    
+    ; Wrong answer handling
+    LEA DX,wrongMsg
+    MOV AH,9
+    INT 21H
+
+    ; FEATURE: Lives system - decrease by 1 on wrong answer
+    DEC lives
+    CLC
+
+    ; Restore all registers using POP
+    POP DI
+    POP SI
+    POP DX
+    POP CX
+    POP BX
+    POP AX
+    RET
