@@ -499,3 +499,503 @@ ASK_COMMON PROC
     POP BX
     POP AX
     RET
+SET_CARRY:
+    ; Correct answer handling
+    LEA DX,correctMsg
+    MOV AH,9
+    INT 21H
+
+    ; Set carry flag to indicate correct answer
+    STC
+
+    ; Restore all registers using POP
+    POP DI
+    POP SI
+    POP DX
+    POP CX
+    POP BX
+    POP AX
+    RET
+
+ASK_COMMON ENDP
+
+
+; SHOW_STATUS PROCEDURE
+
+; FEATURE: Display current game state (score and remaining lives)
+
+SHOW_STATUS PROC
+    LEA DX,scoreMsg
+    MOV AH,9
+    INT 21H
+
+    MOV AX,score
+    CALL PRINT_NUM
+
+    LEA DX,livesMsg
+    MOV AH,9
+    INT 21H
+
+    MOV AL,lives
+    ADD AL,'0'
+    MOV DL,AL
+    MOV AH,2
+    INT 21H
+
+    RET
+
+SHOW_STATUS ENDP
+
+
+; INPUT_STRING PROCEDURE
+
+; FEATURE: String input handler - reads up to 30 characters until Enter
+
+INPUT_STRING PROC
+    MOV CX,30
+
+R:
+    MOV AH,1
+    INT 21H
+    CMP AL,0DH
+    JE D
+
+    MOV [SI],AL
+    INC SI
+    LOOP R
+
+D:
+    MOV AL,'$'
+    MOV [SI],AL
+    RET
+
+INPUT_STRING ENDP
+
+
+; COMPARE_STR PROCEDURE
+
+; FEATURE: String comparison - character by character matching
+
+COMPARE_STR PROC
+    ; Save registers using PUSH
+    PUSH AX
+    PUSH BX
+    PUSH SI
+    PUSH DI
+
+N:
+    MOV AL,[SI]
+    MOV BL,[DI]
+    CMP AL,BL
+    JNE NE
+
+    CMP AL,'$'
+    JE EQ
+
+    INC SI
+    INC DI
+    JMP N
+
+NE:
+    CMP AL,BL
+
+    ; Restore registers using POP
+    POP DI
+    POP SI
+    POP BX
+    POP AX
+    RET
+
+EQ:
+    CMP AL,AL
+
+    ; Restore registers using POP
+    POP DI
+    POP SI
+    POP BX
+    POP AX
+    RET
+
+COMPARE_STR ENDP
+
+
+; PRINT_NUM PROCEDURE
+
+; FEATURE: Decimal number printer - converts binary to ASCII digits
+; Uses stack to reverse digit order for correct display
+
+PRINT_NUM PROC
+    ; Save registers using PUSH
+    PUSH AX
+    PUSH BX
+    PUSH CX
+    PUSH DX
+    
+    CMP AX,0
+    JNE PN
+
+    MOV DL,'0'
+    MOV AH,2
+    INT 21H
+    JMP PD
+
+PN:
+    MOV CX,0
+    MOV BX,10
+
+PL:
+    ; Extract digits by repeatedly dividing by 10
+    MOV DX,0
+    DIV BX
+    PUSH DX
+    INC CX
+    CMP AX,0
+    JNE PL
+
+PP:
+    ; Pop and print digits in correct order
+    POP DX
+    ADD DL,'0'
+    MOV AH,2
+    INT 21H
+    LOOP PP
+
+PD:
+    ; Restore registers using POP
+    POP DX
+    POP CX
+    POP BX
+    POP AX
+    RET
+
+PRINT_NUM ENDP
+
+
+; ADMIN_ENTRY PROCEDURE
+; FEATURE: Character-by-character password validation
+; Password: admin1234567 (exactly 12 characters)
+; Each character validated individually 
+
+ADMIN_ENTRY PROC
+    LEA DX, passmsg
+    MOV AH, 9
+    INT 21H
+    
+    LEA SI, userAns
+    MOV CX, 12
+
+ADMIN_PASS_LOOP:
+    MOV AH, 1
+    INT 21H
+    MOV [SI], AL
+    INC SI
+    LOOP ADMIN_PASS_LOOP
+
+    MOV AL,'$'
+    MOV [SI],AL
+    
+    ; Validate using string comparison loop
+    LEA SI, userAns           ; SI points to user input
+    LEA DI, admin_password    ; DI points to correct password
+    MOV CX, 12                
+
+COMPARE_PASS_LOOP:
+    MOV AL, [SI]              
+    MOV BL, [DI]              
+    CMP AL, BL                
+    JNE ADMIN_FAIL            
+    
+    INC SI                    
+    INC DI
+    LOOP COMPARE_PASS_LOOP    
+    
+    ; Password correct - grant access
+    LEA DX, adminmsg
+    MOV AH, 9
+    INT 21H
+    MOV admin_mode,1
+    JMP ADMIN_MENU
+
+ADMIN_FAIL:
+    ; Password incorrect - return to menu
+    MOV admin_mode,0
+    JMP MENU
+
+ADMIN_ENTRY ENDP
+
+
+; Feature : Modifying the player HP
+
+
+MODIFY_HP:
+    ; Display current HP
+    LEA DX,hpmsg
+    MOV AH,9
+    INT 21H
+    
+    MOV AL,default_hp
+    ADD AL,'0'
+    MOV DL,AL
+    MOV AH,2
+    INT 21H
+    
+    ; Ask for new HP
+    LEA DX,newhpmsg
+    MOV AH,9
+    INT 21H
+    
+    MOV AH,1
+    INT 21H
+    SUB AL,'0'
+    
+    ; Validate HP (1-9)
+    CMP AL,1
+    JB SETTINGS_MENU
+    CMP AL,9
+    JA SETTINGS_MENU
+    
+    ; Set new default HP
+    MOV default_hp,AL
+    
+    LEA DX,hpsuccessmsg
+    MOV AH,9
+    INT 21H
+    JMP SETTINGS_MENU
+
+
+; Feature : Question vault view for Admin 
+
+
+VIEW_OPERATIONS:
+    ; Get level selection for READ
+    LEA DX,levelmsg
+    MOV AH,9
+    INT 21H
+    MOV AH,1
+    INT 21H
+    SUB AL,'0'
+    
+    ; Validate level (1-3)
+    CMP AL,1
+    JB SETTINGS_MENU
+    CMP AL,3
+    JA SETTINGS_MENU
+    
+    MOV current_level,AL
+    JMP READ_QUESTION
+
+
+; READ OPERATION
+
+
+READ_QUESTION:
+    CALL DISPLAY_LEVEL_HEADER
+    
+    MOV current_index,0
+    MOV temp_count,0
+    
+    ; Get the count of existing questions for this level
+    MOV AL,current_level
+    CMP AL,1
+    JE READ_EASY_EXISTING
+    CMP AL,2
+    JE READ_MED_EXISTING
+    JMP READ_HARD_EXISTING
+
+READ_EASY_EXISTING:
+    MOV AL,easyCount
+    MOV temp_count,AL
+    JMP DISPLAY_EXISTING
+
+READ_MED_EXISTING:
+    MOV AL,medCount
+    MOV temp_count,AL
+    JMP DISPLAY_EXISTING
+
+READ_HARD_EXISTING:
+    MOV AL,hardCount
+    MOV temp_count,AL
+
+DISPLAY_EXISTING:
+    ; Display all existing questions
+    MOV current_index,0
+
+EXISTING_LOOP:
+    MOV AL,current_index
+    CMP AL,temp_count
+    JAE READ_DONE
+    
+    ; Display newline
+    LEA DX,newline
+    MOV AH,9
+    INT 21H
+    
+    ; Display question number
+    MOV AL,current_index
+    ADD AL,'1'
+    MOV DL,AL
+    MOV AH,2
+    INT 21H
+    MOV DL,')'
+    MOV AH,2
+    INT 21H
+    MOV DL,' '
+    MOV AH,2
+    INT 21H
+    
+    ; Get question pointer based on level
+    MOV AL,current_level
+    CMP AL,1
+    JE GET_EASY_PTR
+    CMP AL,2
+    JE GET_MED_PTR
+    JMP GET_HARD_PTR
+
+GET_EASY_PTR:
+    MOV BL,current_index
+    MOV BH,0
+    MOV AX,BX
+    MOV CX,2
+    MUL CX
+    MOV BX,AX
+    LEA SI,easyQuestions
+    ADD SI,BX
+    MOV DX,[SI]
+    MOV AH,9
+    INT 21H
+    
+    ; Display answer
+    LEA DX,newline
+    MOV AH,9
+    INT 21H
+    LEA DX,showamsg
+    MOV AH,9
+    INT 21H
+    
+    MOV BL,current_index
+    MOV BH,0
+    MOV AX,BX
+    MOV CX,2
+    MUL CX
+    MOV BX,AX
+    LEA SI,easyAnswers
+    ADD SI,BX
+    MOV DX,[SI]
+    MOV AH,9
+    INT 21H
+    JMP NEXT_EXISTING
+
+GET_MED_PTR:
+    MOV BL,current_index
+    MOV BH,0
+    MOV AX,BX
+    MOV CX,2
+    MUL CX
+    MOV BX,AX
+    LEA SI,medQuestions
+    ADD SI,BX
+    MOV DX,[SI]
+    MOV AH,9
+    INT 21H
+    
+    ; Display answer
+    LEA DX,newline
+    MOV AH,9
+    INT 21H
+    LEA DX,showamsg
+    MOV AH,9
+    INT 21H
+    
+    MOV BL,current_index
+    MOV BH,0
+    MOV AX,BX
+    MOV CX,2
+    MUL CX
+    MOV BX,AX
+    LEA SI,medAnswers
+    ADD SI,BX
+    MOV DX,[SI]
+    MOV AH,9
+    INT 21H
+    JMP NEXT_EXISTING
+
+GET_HARD_PTR:
+    MOV BL,current_index
+    MOV BH,0
+    MOV AX,BX
+    MOV CX,2
+    MUL CX
+    MOV BX,AX
+    LEA SI,hardQuestions
+    ADD SI,BX
+    MOV DX,[SI]
+    MOV AH,9
+    INT 21H
+    
+    ; Display answer
+    LEA DX,newline
+    MOV AH,9
+    INT 21H
+    LEA DX,showamsg
+    MOV AH,9
+    INT 21H
+    
+    MOV BL,current_index
+    MOV BH,0
+    MOV AX,BX
+    MOV CX,2
+    MUL CX
+    MOV BX,AX
+    LEA SI,hardAnswers
+    ADD SI,BX
+    MOV DX,[SI]
+    MOV AH,9
+    INT 21H
+
+NEXT_EXISTING:
+    INC current_index
+    JMP EXISTING_LOOP
+
+READ_DONE:
+    LEA DX,newline
+    MOV AH,9
+    INT 21H
+    JMP SETTINGS_MENU
+
+
+; VIEW SUPPORT PROCEDURES
+
+; Display the header for the current level
+DISPLAY_LEVEL_HEADER PROC
+    MOV AL,current_level
+    CMP AL,1
+    JE SHOW_EASY_HEADER
+    CMP AL,2
+    JE SHOW_MED_HEADER
+
+    LEA DX,hardlabelmsg
+    JMP SHOW_HEADER
+
+SHOW_EASY_HEADER:
+    LEA DX,easylabelmsg
+    JMP SHOW_HEADER
+
+SHOW_MED_HEADER:
+    LEA DX,medlabelmsg
+
+SHOW_HEADER:
+    MOV AH,9
+    INT 21H
+    RET
+DISPLAY_LEVEL_HEADER ENDP
+
+; EXIT PROCEDURE
+
+
+EXIT PROC
+    MOV AX,4C00H
+    INT 21H
+
+EXIT ENDP
+
+END MAIN
